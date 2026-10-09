@@ -61,4 +61,18 @@ def matris_izi_hesaplayıcı(giren_matris):
             else:
                 continue
     return int(matris_izi)
-    
+
+def skaler_matris(matris):
+    doğruluk=False
+    for satır in matris:
+        for sayı in satır:
+            if sayı<0 and sayı>1:
+                doğruluk=True
+            else:
+                doğruluk=False
+    if doğruluk:
+        print("Bu matris skaler matristri")
+    else:
+        print("Bu matris skaler matris değildir")
+    return 0
+
