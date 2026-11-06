@@ -11,8 +11,8 @@ def matris_yapıcı():
             matris[satır_no][eleman_no]=random_number
     return matris
 
-def karasel_matris_yapıcı():
-    sayı_no=int(input("Karasel matrisin boyutunu gir:"+"A mxn deki m ve n yi gir: "))
+def karasel_matris_yapıcı(boyut):
+    sayı_no=boyut
     satır_sayısı=sayı_no
     sütun_sayısı=sayı_no
     matris=randn(satır_sayısı,sütun_sayısı)

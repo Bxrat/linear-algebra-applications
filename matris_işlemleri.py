@@ -12,16 +12,15 @@ def transpoz(giren_matris):
 
     return transpozu_alınmış_matris
 
-def matris_toplayıcı(giren_matris1,giren_matris2):
-    matris1 = np.array(giren_matris1, copy=True)
-    matris2 = np.array(giren_matris2, copy=True)
-    geçiçi_satır=[]
-    yeni_matris=[]
-    for satır1,satır2 in zip(matris1,matris2):
-        for indis_sayacı in range(0,len(satır1)):
-            geçiçi_satır.extend(satır1[indis_sayacı]+satır2[indis_sayacı])
-        yeni_matris.append(geçiçi_satır)
-        geçiçi_satır=[]
+def MatrixSum(entry_matrix,entry_matrix2):
+    matrix1 = np.array(entry_matrix, copy=True)
+    if len(matrix1)!=len(entry_matrix2) or len(matrix1[0])!=len(entry_matrix2[0]):
+        raise expecteions.Matrix_SizeİsNotEqual("Matrices must be MxM MxM type for sum")
+    else:
+        for row_counter in len(matrix1):
+            for index_counter in range(0,len(matrix1[0])):
+                matrix1=matrix1[row_counter][index_counter]+entry_matrix2[row_counter][index_counter]
+        return matrix1
 
 def skaler_çarpım(giren_matris,sabit_sayı):
     matris= np.array(giren_matris, copy=True)
@@ -30,17 +29,34 @@ def skaler_çarpım(giren_matris,sabit_sayı):
             sayı=sayı*sabit_sayı
     return matris
 
-def matris_çarpıcı(giren_matris1,giren_matris2):
-    matris1= np.array(giren_matris1, copy=True)
-    matris2= np.array(giren_matris2, copy=True)
-    çarpılmış_matris=[]
-    geçiçi_satır=[]
-    if len(matris1)!=len(matris2[0]):
-        raise expecteions.MatrixİsNotEqual("Matrices is must be mxn nxm type")
+def MatrixMultiliper(matrix1,matrix2):
+    if len(matrix1)!=len(matrix2[0]):
+        raise expecteions.MatrixİsNotSuitable("Matrices is must be mxn nxm type")
     else:
-        matris2=transpoz(matris2)
-        for satır in matris1:
-            pass
+        total=0.0
+        temp_row=[]
+        resultMatrix=[]
+        for row in range(len(matrix1)):            
+            for counter in range(len(matrix2[0])): 
+                for column in range(len(matrix2)):
+                    multi = matrix1[row][column] * matrix2[column][counter]
+                    total += multi
+                temp_row.append(float(total))
+                total=0.0
+            resultMatrix.append(temp_row)
+            temp_row=[]
+        return resultMatrix
+                
+def PowerOfMatrix(m,power):
+    if power<2:
+        raise expecteions.PowerMustBeMin2("Power must be minumum value of 2")
+    if len(m)!=len(m[0]):
+        raise expecteions.MatrixİsNotSquere("Matrix must be squre type for this calculation")
+    else:
+        sonuç=MatrixMultiliper(m,m)
+        for counter in range(power-2):
+            sonuç=MatrixMultiliper(sonuç,m)
+        return sonuç
 
 class CalcDeterminant:
     def __init__(self,matrix):
@@ -55,7 +71,7 @@ class CalcDeterminant:
         elif len(self.temp_matrix)==1 and len(self.temp_matrix[0])==1:
             self.result=self.temp_matrix[0][0]
         else:
-            self.GaussEliminition()
+            self.GaussEliminitionDet()
     def SarrusRule(self):
         det =0 
         PositiveSide=0
@@ -99,7 +115,7 @@ class CalcDeterminant:
         #i am working on it
         pass
 
-    def GaussEliminition(self,threshold=1e-9):
+    def GaussEliminitionDet(self,threshold=1e-9):
         m=np.array(self.temp_matrix, copy=True)
         pivot=0.0
         multiplier=0.0
@@ -110,7 +126,6 @@ class CalcDeterminant:
                 det_multiplier=det_multiplier*-1
                 max=0.0
                 change_index=0
-                temp_row=[]
                 for counter2 in range(counter+1,len(m)):
                     if max<abs(m[counter2][counter]):
                         # i am working on what if max==0 stiuation
@@ -125,6 +140,82 @@ class CalcDeterminant:
         det = 1.0
         for i in range(len(m)):
             det *= m[i][i]
-
         return det * det_multiplier
-            
+
+def RankOfMatrix(matrix,threshold=1e-9):
+    m=np.array(matrix, copy=True)
+    pivot=0.0
+    multiplier=0.0
+    for counter in range(len(m)):
+        pivot=m[counter][counter]
+        if abs(pivot)<threshold:
+            max=0.0
+            change_index=0
+            for counter2 in range(counter+1,len(m)):
+                if max<abs(m[counter2][counter]):
+
+                    max=abs(m[counter2][counter])
+                    change_index=counter2
+            m[counter],m[change_index]=m[change_index],m[counter]
+        pivot=m[counter][counter]
+        for row_counter in range(counter+1,len(m)):
+            multiplier=m[row_counter][counter]/pivot
+            for number_index in range(len(m[row_counter])):
+                m[row_counter][number_index]=m[row_counter][number_index]-(multiplier*m[counter][number_index])
+    zero_counter=0
+    rank=0
+    for row in m:
+        for numbers in row:
+            if abs(numbers)<threshold:
+                zero_counter+=1
+        if zero_counter!=len(row):
+            rank+=1
+        zero_counter=0
+    return rank
+
+def RREF_Matrix(matrix,threshold=1e-9):
+        np.set_printoptions(suppress=True, precision=4, threshold=100, linewidth=120)
+        m=np.array(matrix, copy=True)
+        pivot=0.0
+        multiplier=0.0
+        swap_history=[]# its for future algoritms
+        secure=0
+        if len(m[0])<len(m):
+            secure=len(m[0])
+        else:
+            secure=len(m)
+        for counter in range(secure):
+            pivot=m[counter][counter]
+            if abs(pivot)<threshold:
+                max=0.0
+                change_index=0
+                for counter2 in range(counter+1,len(m)):
+                    if max<abs(m[counter2][counter]):
+                        max=abs(m[counter2][counter])
+                        change_index=counter2
+                        swap_history.append(counter) #its for future algoritms
+                        swap_history.append(change_index) # its for future algoritms
+                temp = m[counter].copy()
+                m[counter] = m[change_index].copy()
+                m[change_index] = temp
+            pivot=m[counter][counter]
+            for row_counter in range(counter+1,len(m)):
+                multiplier=m[row_counter][counter]/pivot
+                for number_index in range(len(m[row_counter])):
+                    m[row_counter][number_index]=m[row_counter][number_index]-(multiplier*m[counter][number_index])
+
+        for row_index in range(0,secure):
+            for colmun in range(0,len(m[0])):
+                m[row_index][colmun]=m[row_index][colmun]/m[row_index][row_index]
+            if row_index>len(m[0]):
+                break
+
+        multiplier=0.0
+        for counter in range(secure - 1, 0, -1):
+            for row_index in range(counter - 1, -1, -1):
+                multiplier = m[row_index][counter]
+                for i in range(len(m[0])):
+                    m[row_index][i] = m[row_index][i] - (multiplier * m[counter][i])
+        m[abs(m) < threshold] = 0.0
+        print(swap_history)
+        return m
